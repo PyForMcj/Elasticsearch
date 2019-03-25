@@ -1,0 +1,59 @@
+﻿@using Elasticsearch_Web.Models
+@model SearchViewModel<Student>
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<style>
+    b {
+        color:red;
+    }
+</style>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+    <p>
+        @Html.ActionLink("Create New", "Create")
+        <span>一共 @Html.Raw(Model.Total) 条数据</span>
+    </p>
+    <table class="table">
+        <tr>
+            <th>
+                编号
+            </th>
+            <th>
+                名称
+            </th>
+            <th>
+                描述
+            </th>
+            <th>
+                时间
+            </th>
+        </tr>
+    
+    @foreach (var item in Model.Hits) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Source.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Source.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Highlights==null?item.Source.Description:item.Highlights.Keys.Contains("Description")?string.Join("",item.Highlights["Description"].Highlights):item.Source.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Source.DateTime)
+            </td>
+        </tr>
+    }
+    
+    </table>
+</body>
+</html>
