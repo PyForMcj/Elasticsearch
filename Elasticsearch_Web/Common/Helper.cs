@@ -10,11 +10,17 @@ namespace Elasticsearch_Web
     public class Helper
     {
         private static string elasticsearchNodeUri = System.Configuration.ConfigurationManager.AppSettings["ElasticsearchNodeUri"];
-        private ElasticClient elasticClient;
+        public ElasticClient elasticClient;
         public Helper()
         {
             var node = new Uri(elasticsearchNodeUri);
-            var settings = new ConnectionSettings(node).DefaultFieldNameInferrer((name) => name);
+            var settings = new ConnectionSettings(node)
+                //在使用NEST操作elasticsearch时，字段名会根据model中字段，默认为首字母小写。
+                //如果需要调整NEST的默认明个规则，可以在ConnectionSettings中进行自定义。
+                //这里是定义为原样输出。
+                .DefaultFieldNameInferrer((name) => name)
+                //请求超时时间
+                .RequestTimeout(TimeSpan.FromMinutes(5));
             this.elasticClient = new ElasticClient(settings);
         }
 
@@ -39,10 +45,12 @@ namespace Elasticsearch_Web
                          //)//指定查询字段
                 .Query(q => q
                     .MultiMatch(m => m
-                        .Fields(f => f.Fields(p => p.Name, p => p.Description))
+                        .Fields(f => f.Fields(p => p.Description))
                         //.Operator(Operator.And)//针对查询条件的全匹配，比如"北京天安门"，只有数据有这几个字才能搜索出来，比如IK会将"北京天安门"分词成"北京","天安门",那么其他包含"北京","天安门"的数据搜索不出来
                         .Operator(Operator.Or)// 针对查询条件的或匹配，"北京天安门"，"北京","天安门"都能搜出来
                         .Query(key)
+                        //.Fuzziness(Fuzziness.Auto)
+                        //.Type(TextQueryType.BestFields)
                     )
                 )
                 .Highlight(h => h
@@ -53,16 +61,6 @@ namespace Elasticsearch_Web
                 )
              )
             );
-            var source = searchResponse.HitsMetadata.Hits.Select(h => h.Source);
-            var highlights = searchResponse.HitsMetadata.Hits.Select(h => h
-                                .Highlights
-                            );
-            foreach (var item in highlights)
-            {
-                var i = item.Keys;
-                var j = item.Values;
-                var dd = item.Where(c => c.Key == "Description");
-            }
             var model = new SearchViewModel<Student>
             {
                 Hits = searchResponse.Hits,

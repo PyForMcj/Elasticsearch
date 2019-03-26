@@ -10,50 +10,80 @@
     b {
         color:red;
     }
+    table, table tr th, table tr td {
+        border: 1px solid #0094ff;
+    }
+
+    table {
+        width: 200px;
+        min-height: 25px;
+        line-height: 25px;
+        text-align: center;
+        border-collapse: collapse;
+        padding: 2px;
+    }   
 </style>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $("#btn").click(function () {
+            window.location = "/Home/Index?key=" + $("#txt").val();
+        });
+    })    
+</script>
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>Index</title>
 </head>
 <body>
-    <p>
-        @Html.ActionLink("Create New", "Create")
-        <span>一共 @Html.Raw(Model.Total) 条数据</span>
-    </p>
-    <table class="table">
-        <tr>
-            <th>
-                编号
-            </th>
-            <th>
-                名称
-            </th>
-            <th>
-                描述
-            </th>
-            <th>
-                时间
-            </th>
-        </tr>
-    
-    @foreach (var item in Model.Hits) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Source.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Source.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Highlights==null?item.Source.Description:item.Highlights.Keys.Contains("Description")?string.Join("",item.Highlights["Description"].Highlights):item.Source.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Source.DateTime)
-            </td>
-        </tr>
-    }
-    
-    </table>
+
+    <div style="height:700px; width:100%; margin-top:100px;">
+        <p>
+            <span>关键字：</span>
+            <span><input type="text" id="txt" /></span>
+            <span><button id="btn">搜索</button></span>
+        <p style="margin-left:0px; color:royalblue">一共 @Html.Raw(Model.Total) 条数据</p>
+        </p>
+        <table style="width:100%">
+            <thead>
+                <tr>
+                    <th width="10%">
+                        编号
+                    </th>
+                    <th width="30%">
+                        名称
+                    </th>
+                    <th width="45%">
+                        描述
+                    </th>
+                    <th width="15%">
+                        时间
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Hits)
+                {
+
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Source.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Source.Name)
+                        </td>
+                        <td>
+                            @Html.Raw(item.Highlights == null ? item.Source.Description : item.Highlights.Keys.Contains("Description") ? string.Join("", item.Highlights["Description"].Highlights) : item.Source.Description)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Source.DateTime)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
